@@ -3,10 +3,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+with open("./src/config.json", "r") as f: config = json.load(f)
 
 if __name__ == "__main__":
     print("Starting up Yogi...")
     bot = discord.Bot(intents=discord.Intents.all())
+
+    for extension in config["extensions"]: bot.load_extension(f"extensions.{extension}")
 
     @bot.event
     async def on_ready():
