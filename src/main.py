@@ -1,5 +1,6 @@
 import os, json, discord
 from dotenv import load_dotenv
+os.system('cls' if os.name == 'nt' else 'clear')
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')

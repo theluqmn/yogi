@@ -16,11 +16,6 @@ class essentials_ext(commands.Cog):
                     color= discord.Color.brand_green()
                 )
             )
-
-        # # /yogi info
-        # @yogi_group.command(name="info", description= "get information about the bot")
-        # async def info(ctx: discord.ApplicationContext):
-        #     await ctx.respond(embed=)
         
         # /yogi reload {extension}
         @yogi_group.command(name="reload", description= "Reload an extension.")
