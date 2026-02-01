@@ -67,12 +67,25 @@ class currency_ext(commands.Cog):
                 description= f"Here is some information on `{currency}`",
                 color= discord.Color.brand_green()
             )
-            embed.add_field(name= "ID", value= f"`{currency}`", inline= True)
-            embed.add_field(name= "Name", value= f"`{data["name"]}`", inline= True)
-            embed.add_field(name= "Exchange rate", value= f"`USD {exchange_rate}`", inline= False)
-            embed.set_footer(text= "Powered by the Coinbase API.")
-            
+            embed.add_field(name="ID", value=f"`{currency}`", inline=True)
+            embed.add_field(name="Name", value=f"`{data["name"]}`", inline=True)
+            embed.add_field(name="Exchange rate", value=f"`USD {exchange_rate}`", inline=False)
+            embed.set_footer(text="Powered by the Coinbase API.")
+
             await ctx.respond(embed= embed)
+        
+        # # /currency list {type}
+        # @currency_group.command(name="list", description="List all available currencies.")
+        # async def command_list(
+        # ctx: discord.ApplicationContext,
+        # type: discord.Option(name= "type", description="Currency type.", choices= [
+        #     discord.OptionChoice(name="crypto", value="crypto"),
+        #     discord.OptionChoice(name="fiat", value="fiat")
+        # ])): # type: ignore
+        #     if type == "crypto":
+        #         await ctx.respond(crypto_currencies)
+        #     elif type == "fiat":
+        #         await ctx.respond(fiat_currencies)
 
 def setup(bot):
     bot.add_cog(currency_ext(bot))
