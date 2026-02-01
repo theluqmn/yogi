@@ -6,7 +6,7 @@ class essentials(commands.Cog):
         self.bot = bot
         yogi_group = bot.create_group("yogi", "Yogi essential commands")
 
-        # /ping
+        # /yogi ping
         @yogi_group.command(name= "ping", description= "ping the bot")
         async def ping(ctx: discord.ApplicationContext):
             await ctx.respond(embed= 
@@ -16,8 +16,13 @@ class essentials(commands.Cog):
                     color= discord.Color.brand_green()
                 )
             )
+
+        # # /yogi info
+        # @yogi_group.command(name="info", description= "get information about the bot")
+        # async def info(ctx: discord.ApplicationContext):
+        #     await ctx.respond(embed=)
         
-        # /reload {extension}
+        # /yogi reload {extension}
         @yogi_group.command(name="reload", description= "reload an extension")
         @commands.is_owner()
         async def reload(ctx: discord.ApplicationContext, extension: str):
@@ -39,7 +44,7 @@ class essentials(commands.Cog):
                     )
                 )
         
-        # /load {extension}
+        # /yogi load {extension}
         @yogi_group.command(name="load", description= "load an extension")
         @commands.is_owner()
         async def load(ctx: discord.ApplicationContext, extension: str):
@@ -61,7 +66,7 @@ class essentials(commands.Cog):
                     )
                 )
 
-        # /unload {extension}
+        # /yogi unload {extension}
         @yogi_group.command(name="unload", description= "unload an extension")
         @commands.is_owner()
         async def unload(ctx: discord.ApplicationContext, extension: str):
