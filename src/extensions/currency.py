@@ -1,3 +1,5 @@
+# currency = id of the currency (USD, USDT, BTC, etc.)
+
 import requests, json, discord
 from discord.ext import commands
 
@@ -53,7 +55,7 @@ class currency_ext(commands.Cog):
         @currency_group.command(name="info", description="Get information about a fiat/crypto currency.")
         async def command_info(
         ctx: discord.ApplicationContext,
-        type: discord.Option(name= "type", description="Currency type.", choices= [
+        type: discord.Option(name="type", description="Currency type.", choices= [
             discord.OptionChoice(name="crypto", value="crypto"),
             discord.OptionChoice(name="fiat", value="fiat")
         ]), # type: ignore
@@ -73,7 +75,7 @@ class currency_ext(commands.Cog):
             embed.set_footer(text="Powered by the Coinbase API.")
 
             await ctx.respond(embed= embed)
-        
+
         # # /currency list {type}
         # @currency_group.command(name="list", description="List all available currencies.")
         # async def command_list(
