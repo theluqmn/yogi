@@ -7,13 +7,13 @@ from discord.ext import commands
 
 # create an account in the database
 def account_create(account):
-    with sqlite3.connect("./src/database/accounts.db") as conn:
+    with sqlite3.connect("./src/databases/accounts.db") as conn:
         with conn:
             conn.execute("INSERT INTO user VALUES (?)", (account,))            
 
 # check if the account is in the database
 def account_exists(account):
-    with sqlite3.connect("./src/database/accounts.db") as conn:
+    with sqlite3.connect("./src/databases/accounts.db") as conn:
         with conn:
             cursor = conn.execute("SELECT * FROM user WHERE account = ?", (account,))
             if cursor.fetchone() is None:
@@ -23,7 +23,7 @@ def account_exists(account):
 
 # verify access code
 def access_code_verify(account, access_code):
-    with sqlite3.connect("./src/database/accounts.db") as conn:
+    with sqlite3.connect("./src/databases/accounts.db") as conn:
         with conn:
             cursor = conn.execute("SELECT access_code FROM user WHERE account = ?", (account,))
             check = cursor.fetchone()[0]
@@ -35,7 +35,7 @@ def access_code_verify(account, access_code):
             
 # set access code
 def access_code_set(account, access_code, new_access_code):
-    with sqlite3.connect("./src/database/accounts.db") as conn:
+    with sqlite3.connect("./src/databases/accounts.db") as conn:
         with conn:
             if access_code_verify(account, access_code):
                 conn.execute("UPDATE user SET access_code = ? WHERE account = ?", (new_access_code, account))
@@ -47,7 +47,7 @@ class account_ext(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         account_group = bot.create_group("account", "Account-related commands.")
-        with sqlite3.connect("./src/database/accounts.db") as conn:
+        with sqlite3.connect("./src/databases/accounts.db") as conn:
             with conn:
                 conn.execute("CREATE TABLE IF NOT EXISTS user (account INTEGER PRIMARY KEY, tier INTEGER DEFAULT 1, access_code TEXT DEFAULT NULL, locked INTEGER DEFAULT 0, created TEXT)")
 
