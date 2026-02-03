@@ -7,6 +7,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 with open("./src/config.json", "r") as f: config = json.load(f)
 
 if __name__ == "__main__":
+    print(f"pwd: {os.getcwd()}")
     print("Starting up Yogi...")
     bot = discord.Bot(intents=discord.Intents.all())
 

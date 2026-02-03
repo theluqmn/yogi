@@ -1,6 +1,7 @@
 {
     "extensions": [
         "essentials",
-        "currency"
+        "currency",
+        "account"
     ]
 }
