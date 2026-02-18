@@ -1,80 +1,78 @@
-# currency = id of the currency (USD, USDT, BTC, etc.)
-
-import requests, json, discord
+import requests, json, sqlite3, discord
 from discord.ext import commands
 
-fiat_currencies = {}
-crypto_currencies = {}
+currencies = {}
 
 # verify if input currency exists in the index
 def verify_input(currency):
-    if (currency in fiat_currencies or crypto_currencies):
+    if (currency in currencies):
         return True
     else:
         return False
 
-# updates the local index
+# updates the currency index
 def index_update():
-    global fiat_currencies, crypto_currencies
+    global currencies
 
-    response = requests.get("https://api.coinbase.com/v2/currencies")
-    response = json.loads(response.text)
-    data = response["data"]
+    res= requests.get("https://api.coinbase.com/v2/currencies")
+    res= json.loads(res.text)
+    data= res['data']
     for i in data:
-        fiat_currencies[i["id"]] = {"name": i["name"], "min_size": i["min_size"]}
+        currencies[i['id']] = {'name': i['name'], 'type': 'fiat','min_size': i['min_size']}
 
-    response = requests.get("https://api.coinbase.com/v2/currencies/crypto")
-    response = json.loads(response.text)
-    data = response["data"]
+    res= requests.get("https://api.coinbase.com/v2/currencies/crypto")
+    res= json.loads(res.text)
+    data= res['data']
     for i in data:
-        crypto_currencies[i["code"]] = {"name": i["name"], "asset_id": i["asset_id"]}
+        currencies[i['code']] = {'name': i['name'], 'type': 'crypto','asset_id': i['asset_id']}
 
-# get an item from the indexes
-def index_get(type, currency):
+# get an item from the currency index
+def index_get(currency):
     if verify_input(currency) == True:
-        if type == "fiat": return fiat_currencies[currency]
-        if type == "crypto": return crypto_currencies[currency]
+        return currencies[currency]
 
-# gets the exchange rate in target currency of a base currency
-def exchange_rate_get(base_currency, target_currency):
-    global fiat_currencies, crypto_currencies
+# gets the exchange rate in target
 
-    if (verify_input(base_currency) and verify_input(target_currency)):
-        response = requests.get(f"https://api.coinbase.com/v2/exchange-rates?currency={base_currency}")
-        response = json.loads(response.text)
-        data = response["data"]["rates"]
-        return data[target_currency]
-
+# discord handlers
 class currency_ext(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
-        currency_group = bot.create_group("currency", "Currency-related commands.")
+        self.bot= bot
+        currency_group= bot.create_group("currency")
         index_update()
 
-        # /currency info {type} {currency}
-        @currency_group.command(name="info", description="Get information about a fiat/crypto currency.")
-        async def command_info(
-        ctx: discord.ApplicationContext,
-        type: discord.Option(name="type", description="Currency type.", choices= [
-            discord.OptionChoice(name="crypto", value="crypto"),
-            discord.OptionChoice(name="fiat", value="fiat")
-        ]), # type: ignore
-        currency: str):
-            currency = currency.upper()
-            data = index_get(type, currency)
-            exchange_rate = exchange_rate_get(currency, "USD")
+        # /currency info [currency]
+        @currency_group.command(name= "info", description= "Information about a currency")
+        async def command_info(ctx: discord.ApplicationContext, currency: str):
+            currency= currency.upper()
+            if verify_input(currency):
+                data= index_get(currency)
 
-            embed = discord.Embed(
-                title= "Currency Info",
-                description= f"Here is some information on `{currency}`",
-                color= discord.Color.brand_green()
-            )
-            embed.add_field(name="ID", value=f"`{currency}`", inline=True)
-            embed.add_field(name="Name", value=f"`{data["name"]}`", inline=True)
-            embed.add_field(name="Exchange rate", value=f"`USD {exchange_rate}`", inline=False)
-            embed.set_footer(text="Powered by the Coinbase API.")
+                embed = discord.Embed(
+                    title= "Currency Info",
+                    color= discord.Color.brand_green()
+                )
+                embed.add_field(name= "ID", value=f"`{currency}`", inline= True)
+                embed.add_field(name= "Name", value=f"`{data['name']}`", inline= True)
+                if data['type'] == "fiat": embed.add_field(name= "Min. size", value=f"`{data['min_size']}`", inline= False)
+                else: embed.add_field(name= "Asset ID:", value= f"f`{data['asset_id']}`", inline= False)
 
-            await ctx.respond(embed= embed)
+                await ctx.respond(embed= embed)
+
+        # /currency list [type]
+
+        # /currency balance [currency]
+
+        # /currency buy [currency] [amount]
+
+        # /currency sell [currency] [amount]
+
+        # /currency swap [currency]
+
+        # /currency base [currency]
+
+        # /currency portfolio [type]
+
+        # /currency transfer [account] [amount] [note] (currency)
 
 def setup(bot):
     bot.add_cog(currency_ext(bot))
