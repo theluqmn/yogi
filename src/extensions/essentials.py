@@ -3,21 +3,21 @@ from discord.ext import commands
 
 class essentials_ext(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
-        yogi_group = bot.create_group("yogi", "Yogi essential commands")
+        self.bot= bot
+        yogi_group= bot.create_group("yogi", "Yogi essential commands")
 
         # /yogi ping
         @yogi_group.command(name= "ping", description= "Ping the bot.")
         async def ping(ctx: discord.ApplicationContext):
-            await ctx.respond(embed= 
-                discord.Embed(
-                    title= "Pong!",
-                    description= f"Latency: {round(self.bot.latency * 1000)}ms",
-                    color= discord.Color.brand_green()
-                )
+            embed= discord.Embed(
+                title= "Pong!",
+                description= f"Latency: {round(self.bot.latency * 1000)}ms",
+                color= discord.Color.brand_green()
             )
-        
-        # /yogi reload {extension}
+            
+            await ctx.respond(embed= embed)
+
+        # /yogi reload {extension} - ADMIN ONLY
         @yogi_group.command(name="reload", description= "Reload an extension.")
         @commands.is_owner()
         async def reload(ctx: discord.ApplicationContext, extension: str):
@@ -39,7 +39,7 @@ class essentials_ext(commands.Cog):
                     )
                 )
         
-        # /yogi load {extension}
+        # /yogi load {extension} - ADMIN ONLY
         @yogi_group.command(name="load", description= "Load an extension.")
         @commands.is_owner()
         async def load(ctx: discord.ApplicationContext, extension: str):
@@ -61,7 +61,7 @@ class essentials_ext(commands.Cog):
                     )
                 )
 
-        # /yogi unload {extension}
+        # /yogi unload {extension} - ADMIN ONLY
         @yogi_group.command(name="unload", description= "Unload an extension.")
         @commands.is_owner()
         async def unload(ctx: discord.ApplicationContext, extension: str):
