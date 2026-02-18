@@ -76,18 +76,5 @@ class currency_ext(commands.Cog):
 
             await ctx.respond(embed= embed)
 
-        # # /currency list {type}
-        # @currency_group.command(name="list", description="List all available currencies.")
-        # async def command_list(
-        # ctx: discord.ApplicationContext,
-        # type: discord.Option(name= "type", description="Currency type.", choices= [
-        #     discord.OptionChoice(name="crypto", value="crypto"),
-        #     discord.OptionChoice(name="fiat", value="fiat")
-        # ])): # type: ignore
-        #     if type == "crypto":
-        #         await ctx.respond(crypto_currencies)
-        #     elif type == "fiat":
-        #         await ctx.respond(fiat_currencies)
-
 def setup(bot):
     bot.add_cog(currency_ext(bot))
