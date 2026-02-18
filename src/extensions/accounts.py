@@ -2,7 +2,7 @@
 # passcode = hashed and salted text code to toggle account lock, as well as validify major transactions
 # tier =
 
-import sqlite3, discord
+import sqlite3, discord, datetime
 from discord.ext import commands
 
 # create an account in the database
@@ -14,7 +14,8 @@ def account_create(account):
 def account_exists(account):
     with sqlite3.connect("./src/database/accounts.db") as conn:
         with conn:
-            cursor= conn.execute("SELECT * FROM user WHERE account = ?", (account,))
+            timestamp= datetime.datetime.now().strftime("%Y-%m-%d %H:%M%S")
+            cursor= conn.execute("SELECT * FROM user WHERE account = (?, ?, ?, ?, ?, ?, ?)", (account, 1, 0, "password", 0, "", timestamp))
             if cursor.fetchone() is None:
                 return False
             else:

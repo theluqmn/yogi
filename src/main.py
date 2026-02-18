@@ -3,13 +3,13 @@ from dotenv import load_dotenv
 os.system('cls' if os.name == 'nt' else 'clear')
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-with open("./src/config.json", "r") as f: config = json.load(f)
+TOKEN= os.getenv('DISCORD_TOKEN')
+with open("./src/config.json", "r") as f: config= json.load(f)
 
 if __name__ == "__main__":
     print(f"pwd: {os.getcwd()}")
     print("Starting up Yogi...")
-    bot = discord.Bot(intents=discord.Intents.all())
+    bot= discord.Bot(intents= discord.Intents.all())
 
     for extension in config["extensions"]: bot.load_extension(f"extensions.{extension}")
 
