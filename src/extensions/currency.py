@@ -111,7 +111,7 @@ class currency_ext(commands.Cog):
                 embed.set_footer(text= "Data provided by the Coinbase API.")
 
                 await ctx.respond(embed= embed)
-            else:
+            else: # invalid currency
                 embed= discord.Embed(
                     title= "Currency info",
                     description= "**Error**: Invalid currency/token ID provided.\nPlease refer to `/currency list [fiat/crypto]` for the list of supported currencies.\n\nCommon currencies include `USD`, `USDT`, `BTC`, `ETH`.",
@@ -144,7 +144,7 @@ class currency_ext(commands.Cog):
                 embed.set_footer(text= "Need more money? Work harder lol")
 
                 await ctx.respond(embed= embed)
-            else:
+            else: # invalid currency
                 embed= discord.Embed(
                     title= f"{ctx.author.name}'s {currency} balance",
                     description= "**Error**: Invalid currency/token ID provided.\nPlease refer to `/currency list [fiat/crypto]` for the list of supported currencies.\n\nCommon currencies include `USD`, `USDT`, `BTC`, `ETH`.",

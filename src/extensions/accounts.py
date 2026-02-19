@@ -4,19 +4,23 @@
 
 import sqlite3, discord, datetime
 from discord.ext import commands
+from extensions.currency import account_currency_init, account_currency_add
 
 # create an account in the database
-def account_create(account):
+def account_create(account, timestamp):
     with sqlite3.connect("./src/databases/accounts.db") as conn:
-        with conn: conn.execute("INSERT INTO user VALUES (?)", (account,))
+        with conn: conn.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)", (account, 1, 0, "password", 0, "{}", timestamp))
+    account_currency_init(account, "USD")
+    account_currency_add(account, "USD", 2500)
 
 # check if an account exists in the database
-def account_exists(account):
-    with sqlite3.connect("./src/database/accounts.db") as conn:
+def account_exists(account: str):
+    with sqlite3.connect("./src/databases/accounts.db") as conn:
         with conn:
-            timestamp= datetime.datetime.now().strftime("%Y-%m-%d %H:%M%S")
-            cursor= conn.execute("SELECT * FROM user WHERE account = (?, ?, ?, ?, ?, ?, ?)", (account, 1, 0, "password", 0, "", timestamp))
-            if cursor.fetchone() is None:
+            cursor= conn.cursor()
+            cursor.execute("SELECT tier FROM user WHERE account=?", (account,))
+            result= cursor.fetchone()
+            if result is None:
                 return False
             else:
                 return True
@@ -32,14 +36,15 @@ class account_ext(commands.Cog):
         # /account create
         @account_group.command(name= "create", description= "Create your Yogi account")
         async def command_create(ctx: discord.ApplicationContext):
-            if account_exists:
-                account_create(ctx.author.id)
+            if account_exists(ctx.author.id) == False:
+                account_create(ctx.author.id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                 embed= discord.Embed(
                     title= "Account Creation Successful!",
                     description= f"Hello {ctx.author.mention}, you are now part of the Yogi community!",
                     color= discord.Color.brand_green()
                 )
-                embed.set_footer(text="/account create")
+                embed.set_author(name="/account create")
+                embed.set_footer(text= "A warm welcome!")
 
                 await ctx.respond(embed= embed)
             else:
