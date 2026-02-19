@@ -51,7 +51,7 @@ def account_currency_exists(account: int, currency: str):
 # initialise a currency for the user
 def account_currency_init(account: int, currency: str):
     with sqlite3.connect('./src/databases/assets.db') as conn:
-        with conn: conn.execute("INSERT INTO currencies (account, currency, amount) VALUES (?, ?, ?)", (account, currency, 0))
+        with conn: conn.execute("INSERT OR IGNORE INTO currencies (account, currency, amount) VALUES (?, ?, ?)", (account, currency, 0))
 
 # fetch user balance
 def account_currency_balance(account: int, currency: str):
@@ -61,7 +61,7 @@ def account_currency_balance(account: int, currency: str):
         with conn:
             cursor = conn.cursor()
             cursor.execute("SELECT amount FROM currencies WHERE account=? AND currency=?", (account, currency))
-            return cursor.fetchone()
+            return cursor.fetchone()[0]
 
 # add to balance of a user
 def account_currency_add(account: int, currency: str, amount: float):
@@ -88,7 +88,7 @@ class currency_ext(commands.Cog):
 
         with sqlite3.connect("./src/databases/assets.db") as conn:
             with conn:
-                conn.execute("CREATE TABLE IF NOT EXISTS currencies (account INTEGER, currency TEXT, amount FLOAT)")
+                conn.execute("CREATE TABLE IF NOT EXISTS currencies (account INTEGER, currency TEXT, amount FLOAT, UNIQUE(account, currency))")
 
         # /currency info [currency]
         @currency_group.command(name= "info", description= "Information about a currency")
@@ -98,22 +98,22 @@ class currency_ext(commands.Cog):
                 data= index_get(currency)
 
                 embed= discord.Embed(
-                    title= "Currency Info",
+                    title= "Currency info",
                     color= discord.Color.yellow()
                 )
+                embed.set_author(name= f"/currency info {currency}")
                 embed.add_field(name= "ID", value=f"`{currency}`", inline= True)
                 embed.add_field(name= "Name", value=f"`{data['name']}`", inline= True)
                 if data['type'] == "fiat":
                     embed.add_field(name= "Currency min. size", value=f"`{data['min_size']}`", inline= False)
                 else:
                     embed.add_field(name= "Crypto asset ID:", value= f"f`{data['asset_id']}`", inline= False)
-                embed.set_author(name= f"/currency info {currency}")
                 embed.set_footer(text= "Data provided by the Coinbase API.")
 
                 await ctx.respond(embed= embed)
             else:
                 embed= discord.Embed(
-                    title= "Currency Info",
+                    title= "Currency info",
                     description= "**Error**: Invalid currency/token ID provided.\nPlease refer to `/currency list [fiat/crypto]` for the list of supported currencies.\n\nCommon currencies include `USD`, `USDT`, `BTC`, `ETH`.",
                     color= discord.Color.brand_red()
                 )
@@ -126,9 +126,35 @@ class currency_ext(commands.Cog):
         # /currency list [type]
 
         # /currency balance [currency]
-        # @currency_group.command(name= "balance", description= "Your balance for a particular currency (defaults to your base)")
-        # async def command_balance(ctx: discord.ApplicationContext, currency: str = "USD"):
-        #     currency= currency.upper()
+        @currency_group.command(name= "balance", description= "Your balance for a particular currency (defaults to your base)")
+        async def command_balance(ctx: discord.ApplicationContext, currency: str = "USD"):
+            currency= currency.upper()
+            if index_verify(currency):
+                if account_currency_exists(ctx.author.id, currency) == False: account_currency_init(ctx.author.id, currency)
+                balance= account_currency_balance(ctx.author.id, currency)
+                currency_data = index_get(currency)
+
+                embed= discord.Embed(
+                    title= f"{ctx.author.name}'s balance",
+                    color= discord.Color.brand_green()
+                )
+                embed.set_author(name= f"/currency balance {currency}")
+                embed.add_field(name= "Currency", value= f"{currency} ({currency_data['name']})")
+                embed.add_field(name= "Balance", value= f"{balance}", inline= True)
+                embed.set_footer(text= "Need more money? Work harder lol")
+
+                await ctx.respond(embed= embed)
+            else:
+                embed= discord.Embed(
+                    title= f"{ctx.author.name}'s {currency} balance",
+                    description= "**Error**: Invalid currency/token ID provided.\nPlease refer to `/currency list [fiat/crypto]` for the list of supported currencies.\n\nCommon currencies include `USD`, `USDT`, `BTC`, `ETH`.",
+                    color= discord.Color.brand_red()
+                )
+                embed.set_author(name= f"/currency balance {currency}")
+                embed.set_image(url="https://http.cat/400.jpg")
+                embed.set_footer(text= "Looks like you need '/yogi help'...")
+
+                await ctx.respond(embed= embed)
 
         # /currency buy [currency] [amount]
 
