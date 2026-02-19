@@ -4,6 +4,7 @@
 
 import requests, json, sqlite3, discord
 from discord.ext import commands
+from extensions.accounts import account_exists
 
 currencies= {}
 
@@ -77,6 +78,22 @@ def account_currency_sub(account: int, currency: str, amount: float):
             return True
     else: # insufficient balance
         return False
+
+# get pair buy rate
+def pair_buy_rate(base: str, target: str):
+    res= requests.get(f'https://api.coinbase.com/v2/prices/{base}-{target}/buy')
+    res= json.loads(res.text)
+    data= res['data']
+    return data['amount']
+
+# get pair sell rate
+def pair_buy_rate(base: str, target: str):
+    res= requests.get(f'https://api.coinbase.com/v2/prices/{base}-{target}/sell')
+    res= json.loads(res.text)
+    data= res['data']
+    return data['amount']
+
+# get pair exchange rate
 
 # discord handlers
 class currency_ext(commands.Cog):
@@ -161,6 +178,14 @@ class currency_ext(commands.Cog):
         # /currency sell [currency] [amount]
 
         # /currency swap [currency]
+        # @currency_group.command(name= "swap", description= "Swap between fiat and crypto pairs")
+        # async def command_swap(ctx: discord.ApplicationContext, pair: discord.Option(name= "pair", description= "Currency pair", choices= [
+        #     discord.OptionChoice(name="USD->USDT", value="USD-USDT"),
+        #     discord.OptionChoice(name="USDT->USD", value="USDT-USD")
+        # ])): # type: ignore
+        #     if (pair == "USD-USDT"):
+        #         if account_currency_exists
+        # swap logic will reference config.json to allow for dynamic addition/subtraction of pairs
 
         # /currency base [currency]
 
