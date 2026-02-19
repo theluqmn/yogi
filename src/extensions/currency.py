@@ -1,43 +1,43 @@
 # account= discord ID
 # currency= currency ticker/symbol (eg: BTC, USDT, USD, etc.)
+# input validation and formatting done at discord handler level, hence no checks or formatting are in the core functions to simplify code and reduce repetition.
 
 import requests, json, sqlite3, discord
 from discord.ext import commands
 
 currencies= {}
 
-# verify if input currency exists in the index
+# verify if input currency is supported
 def index_verify(currency):
     if (currency in currencies):
         return True
     else:
         return False
 
-# updates the currency index
+# update the index with coinbase data
 def index_update():
     global currencies
 
-    res= requests.get("https://api.coinbase.com/v2/currencies")
+    res= requests.get('https://api.coinbase.com/v2/currencies')
     res= json.loads(res.text)
     data= res['data']
     for i in data:
         currencies[i['id']] = {'name': i['name'], 'type': 'fiat','min_size': i['min_size']}
 
-    res= requests.get("https://api.coinbase.com/v2/currencies/crypto")
+    res= requests.get('https://api.coinbase.com/v2/currencies/crypto')
     res= json.loads(res.text)
     data= res['data']
     for i in data:
         currencies[i['code']] = {'name': i['name'], 'type': 'crypto','asset_id': i['asset_id']}
 
-# get an item from the currency index
+# get currency data from the index
 def index_get(currency):
     if index_verify(currency) == True:
         return currencies[currency]
 
-# verify if account has a certain currency
+# verify if the user has a certain currency
 def account_currency_exists(account: int, currency: str):
-    currency= currency.upper()
-    with sqlite3.connect("./src/databases/assets.db") as conn:
+    with sqlite3.connect('./src/databases/assets.db') as conn:
         with conn:
             cursor= conn.cursor()
             cursor.execute("SELECT amount FROM currencies WHERE account=? AND currency=?", (account, currency))
@@ -47,14 +47,37 @@ def account_currency_exists(account: int, currency: str):
                 return False
             else:
                 return True
-            
-# create a currency for the user
-def account_currency_add(account: int, currency: str):
-    if account_currency_exists(account, currency) == False:
-        currency= currency.upper()
-        with sqlite3.connect("./src/databases/assets.db") as conn:
-            with conn: conn.execute("INSERT INTO currencies (account, currency, amount) VALUES (?, ?, ?)", (account, currency, 0))
-            
+
+# initialise a currency for the user
+def account_currency_init(account: int, currency: str):
+    with sqlite3.connect('./src/databases/assets.db') as conn:
+        with conn: conn.execute("INSERT INTO currencies (account, currency, amount) VALUES (?, ?, ?)", (account, currency, 0))
+
+# fetch user balance
+def account_currency_balance(account: int, currency: str):
+    currency = currency.upper()
+    if account_currency_exists(account, currency) != False: account_currency_init(account, currency)
+    with sqlite3.connect('./src/databases/assets.db') as conn:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT amount FROM currencies WHERE account=? AND currency=?", (account, currency))
+            return cursor.fetchone()
+
+# add to balance of a user
+def account_currency_add(account: int, currency: str, amount: float):
+    with sqlite3.connect('./src/databases/assets.db') as conn:
+        with conn: conn.execute("UPDATE currencies SET amount = amount + ? WHERE account=? AND currency=?", (amount, account, currency))
+
+# subtract to balance of a user
+def account_currency_sub(account: int, currency: str, amount: float):
+    balance= account_currency_balance(account, currency)
+    if balance >= amount:
+        with sqlite3.connect('./src/databases/assets.db') as conn:
+            with conn: conn.execute("UPDATE currencies SET amount = amount - ? WHERE account=? AND currency=?", (amount, account, currency))
+            return True
+    else: # insufficient balance
+        return False
+
 # discord handlers
 class currency_ext(commands.Cog):
     def __init__(self, bot):
@@ -75,7 +98,7 @@ class currency_ext(commands.Cog):
                 data= index_get(currency)
 
                 embed= discord.Embed(
-                    title= "🪙 Currency Info",
+                    title= "Currency Info",
                     color= discord.Color.yellow()
                 )
                 embed.add_field(name= "ID", value=f"`{currency}`", inline= True)
@@ -85,13 +108,27 @@ class currency_ext(commands.Cog):
                 else:
                     embed.add_field(name= "Crypto asset ID:", value= f"f`{data['asset_id']}`", inline= False)
                 embed.set_author(name= f"/currency info {currency}")
-                embed.set_footer(text= "Powered by the Coinbase API.")
+                embed.set_footer(text= "Data provided by the Coinbase API.")
+
+                await ctx.respond(embed= embed)
+            else:
+                embed= discord.Embed(
+                    title= "Currency Info",
+                    description= "**Error**: Invalid currency/token ID provided.\nPlease refer to `/currency list [fiat/crypto]` for the list of supported currencies.\n\nCommon currencies include `USD`, `USDT`, `BTC`, `ETH`.",
+                    color= discord.Color.brand_red()
+                )
+                embed.set_author(name= f"/currency info {currency}")
+                embed.set_image(url="https://http.cat/400.jpg")
+                embed.set_footer(text= "Looks like you need '/yogi help'...")
 
                 await ctx.respond(embed= embed)
 
         # /currency list [type]
 
         # /currency balance [currency]
+        # @currency_group.command(name= "balance", description= "Your balance for a particular currency (defaults to your base)")
+        # async def command_balance(ctx: discord.ApplicationContext, currency: str = "USD"):
+        #     currency= currency.upper()
 
         # /currency buy [currency] [amount]
 
