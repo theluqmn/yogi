@@ -4,7 +4,6 @@
 
 import requests, json, sqlite3, discord
 from discord.ext import commands
-from extensions.accounts import account_exists
 
 currencies= {}
 
@@ -178,13 +177,35 @@ class currency_ext(commands.Cog):
         # /currency sell [currency] [amount]
 
         # /currency swap [currency]
-        # @currency_group.command(name= "swap", description= "Swap between fiat and crypto pairs")
-        # async def command_swap(ctx: discord.ApplicationContext, pair: discord.Option(name= "pair", description= "Currency pair", choices= [
-        #     discord.OptionChoice(name="USD->USDT", value="USD-USDT"),
-        #     discord.OptionChoice(name="USDT->USD", value="USDT-USD")
-        # ])): # type: ignore
-        #     if (pair == "USD-USDT"):
-        #         if account_currency_exists
+        @currency_group.command(name= "swap", description= "Swap between fiat and crypto pairs")
+        async def command_swap(ctx: discord.ApplicationContext, pair: discord.Option(name= "pair", description= "Currency pair", choices= [
+            discord.OptionChoice(name="USD->USDT", value="USD-USDT"),
+            discord.OptionChoice(name="USDT->USD", value="USDT-USD")
+        ]), amount: float): # type: ignore
+            if (pair == "USD-USDT"):
+                if account_currency_exists(ctx.author.id, "USDT") == False: account_currency_init(ctx.author.id, "USDT")
+                usd_balance= account_currency_balance(ctx.author.id, "USD")
+
+                if account_currency_sub(ctx.author.id, "USD", amount):
+                    account_currency_add(ctx.author.id, "USDT", amount)
+                    embed= discord.Embed(
+                        title= f"Currency Swap Successful",
+                        description= f"Successfully swapped `USD {amount}` to `USDT {amount}.`",
+                        color= discord.Color.brand_green()
+                    )
+                    embed.set_author(name= f"/currency swap USD-USDT {amount}")
+
+                    await ctx.respond(embed= embed)
+                else: # insufficient balance
+                    embed= discord.Embed(
+                        title= f"Currency Swap Failed",
+                        description= f"**Error**: Insufficient `USD` balance to perform `USD-USDT` swap with the specified amount ({amount}).\n\nYour balance is only `USD {usd_balance}.`",
+                        color= discord.Color.brand_red()
+                    )
+                    embed.set_author(name= f"/currency swap USD-USDT {amount}")
+                    embed.set_footer(text= "You need more money bro.")
+
+                    await ctx.respond(embed= embed)
         # swap logic will reference config.json to allow for dynamic addition/subtraction of pairs
 
         # /currency base [currency]
