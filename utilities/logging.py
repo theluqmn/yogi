@@ -2,7 +2,7 @@
 # statistics flags = 0 - failed (red), 1 - success (green), 2 - info (blue), 3 - warn (orange)
 
 import sqlite3, datetime
-db = './src/databases/logs.db'
+db = './databases/logs.db'
 
 def timestamp_get(): return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 

@@ -10,8 +10,7 @@ class account_ext(commands.Cog):
     def __init__(self, bot):
         self.bot= bot
         account_group= bot.create_group("account", "Account-related commands.")
-        with sqlite3.connect("./src/databases/accounts.db") as conn:
-            with conn: conn.execute("CREATE TABLE IF NOT EXISTS user (account INTEGER PRIMARY KEY, tier INTEGER, lockdown INTEGER, passcode TEXT, flag INTEGER, settings TEXT, created TEXT)")
+        accounts.initialise()
 
         # /account create
         @account_group.command(name= "create", description= "Create your Yogi account")

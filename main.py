@@ -1,11 +1,11 @@
 import os, json, discord
 from dotenv import load_dotenv
-from scripts.logging import log_event, log_initialise
+from utilities.logging import log_event, log_initialise
 os.system('cls' if os.name == 'nt' else 'clear')
 
 load_dotenv()
 TOKEN= os.getenv('DISCORD_TOKEN')
-with open(".config.json", "r") as f: config= json.load(f)
+with open("bot_config.json", "r") as f: config= json.load(f)
 
 if __name__ == "__main__":
     print(f"cwd: {os.getcwd()}")
@@ -17,8 +17,8 @@ if __name__ == "__main__":
         try:
             bot.load_extension(f"extensions.{extension}")
             log_event(0, f"extension '{extension}' loaded successfully")
-        except:
-            log_event(1, f"extension '{extension}' failed to load")
+        except Exception as err:
+            log_event(1, f"extension '{extension}' failed to load: {err}")
 
     @bot.event
     async def on_ready():
