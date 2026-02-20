@@ -1,7 +1,6 @@
 # index = 
 
 import requests, json, sqlite3
-from services import accounts
 db = './databases/assets.db'
 currencies = {}
 

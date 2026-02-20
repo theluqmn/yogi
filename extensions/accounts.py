@@ -2,7 +2,7 @@
 # passcode = hashed and salted text code to toggle account lock, as well as validify major transactions
 # tier = 1 (member), 2 (novice), 3 (executive), 4 (icon), 5 (elite)
 
-import sqlite3, discord, datetime
+import discord, datetime
 from discord.ext import commands
 from services import accounts
 
