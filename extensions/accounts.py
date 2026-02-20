@@ -4,28 +4,8 @@
 
 import sqlite3, discord, datetime
 from discord.ext import commands
-from extensions import currency
+from services import accounts
 
-# create an account in the database
-def account_create(account, timestamp):
-    with sqlite3.connect("./src/databases/accounts.db") as conn:
-        with conn: conn.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)", (account, 1, 0, "password", 0, "{}", timestamp))
-    currency.account_currency_init(account, "USD")
-    currency.account_currency_add(account, "USD", 2500)
-
-# check if an account exists in the database
-def account_exists(account: str):
-    with sqlite3.connect("./src/databases/accounts.db") as conn:
-        with conn:
-            cursor= conn.cursor()
-            cursor.execute("SELECT tier FROM user WHERE account=?", (account,))
-            result= cursor.fetchone()
-            if result is None:
-                return False
-            else:
-                return True
-
-# discord handler
 class account_ext(commands.Cog):
     def __init__(self, bot):
         self.bot= bot
@@ -36,8 +16,8 @@ class account_ext(commands.Cog):
         # /account create
         @account_group.command(name= "create", description= "Create your Yogi account")
         async def command_create(ctx: discord.ApplicationContext):
-            if account_exists(ctx.author.id) == False:
-                account_create(ctx.author.id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            if accounts.if_exists(ctx.author.id) == False:
+                accounts.create(ctx.author.id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                 embed= discord.Embed(
                     title= "Account Creation Successful!",
                     description= f"Hello {ctx.author.mention}, you are now part of the Yogi community!",
