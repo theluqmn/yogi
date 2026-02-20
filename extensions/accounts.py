@@ -4,14 +4,14 @@
 
 import sqlite3, discord, datetime
 from discord.ext import commands
-from extensions.currency import account_currency_init, account_currency_add
+from extensions import currency
 
 # create an account in the database
 def account_create(account, timestamp):
     with sqlite3.connect("./src/databases/accounts.db") as conn:
         with conn: conn.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)", (account, 1, 0, "password", 0, "{}", timestamp))
-    account_currency_init(account, "USD")
-    account_currency_add(account, "USD", 2500)
+    currency.account_currency_init(account, "USD")
+    currency.account_currency_add(account, "USD", 2500)
 
 # check if an account exists in the database
 def account_exists(account: str):

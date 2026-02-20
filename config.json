@@ -1,0 +1,17 @@
+{
+    "extensions": [
+        "essentials",
+        "currency",
+        "accounts"
+    ],
+    "admins": [
+        813939364626169856
+    ],
+    "currency": {
+        "wikipedia-pairs": {},
+        "swap-pairs": [
+            ["USD","USDT"],
+            ["USDT", "USD"]
+        ]
+    }
+}

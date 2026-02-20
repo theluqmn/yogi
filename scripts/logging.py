@@ -1,5 +1,5 @@
 # timestamp format = yyyy-mm-dd HH:MM:SS
-# statistics flags = 0 - info, 1 - warning, 2 - error
+# statistics flags = 0 - failed (red), 1 - success (green), 2 - info (blue), 3 - warn (orange)
 
 import sqlite3, datetime
 db = './src/databases/logs.db'

@@ -4,6 +4,7 @@
 
 import requests, json, sqlite3, discord
 from discord.ext import commands
+from extensions import accounts
 
 currencies= {}
 
